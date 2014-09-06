@@ -1,5 +1,5 @@
 === Antay Query Loader ===
-Tags: comments, spam
+Tags: script, utility
 Requires at least: 3.9.2
 Tested up to: 3.9.2
 Stable tag: 4.3
