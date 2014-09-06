@@ -19,6 +19,10 @@ This section describes how to install the plugin and get it working.
 4. Go to ‘Antay Query Loader’ settings page then check the box to enable the plugin.
 3. Enjoy! You will notice loading screen when you try to load your website( any page )
 
+== Screenshots ==
+
+1.) You will see a loading page like this.
+
 == Frequently Asked Questions ==
 = What do I need to do to configure the plugin? =
 Nothing, install, activate and enable it is all that is needed.
