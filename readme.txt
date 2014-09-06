@@ -14,9 +14,7 @@ Create a loading page that will run until your website and it's assets( images, 
 
 This section describes how to install the plugin and get it working.
 
-e.g.
-
-1. Upload `ultimate-loading-plugin.php` to the `/wp-content/plugins/` directory
+1. Upload `antay-query-loader.zip` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 4. Go to ‘Antay Query Loader’ settings page then check the box to enable the plugin.
 3. Enjoy! You will notice loading screen when you try to load your website( any page )
