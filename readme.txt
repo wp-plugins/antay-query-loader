@@ -40,6 +40,8 @@ This section describes how to install the plugin manually and get it working.
 = Can I change the settings / styles of the loading screen? =
 Yes, you can. by navigating to Admin -> Antay Query Loader -> and you will see a handful of option field there to change the look of the loading screen.
 
+== Changelog ==
+
 = 2.0 =
 * Make major change to the code. 
 
