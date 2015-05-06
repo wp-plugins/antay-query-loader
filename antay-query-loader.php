@@ -2,137 +2,102 @@
 
 /*
 Plugin Name: Antay Query Loader
-Description: Create a loading page that will run until your website and it's assets( images, files, etc ) successfully loaded.
+Description: A wordpress plugin version of QueryLoader2. Read more about it here: https://github.com/Gaya/QueryLoader2
 Author: Calvin Canas
 Author URI: http://calvincanas.com
 License: GPLv2 or later.
-Version: 1.0
+Version: 2.0
+Text Domain: antay-query-loader
+Domain Path: /languages
 
+
+Special thanks to WordPress Codex, tom mcfarlin, http://mikejolley.com/, http://ottopress.com, https://blog.gaya.ninja - they are my resources for this plugin
 */
 
 defined('ABSPATH') or die(-1);
 
 
-define('PLUGIN_ROOT_PATH', plugins_url( '', __FILE__ ) );
+define('PLUGIN_URL_PATH', plugins_url( '', __FILE__ ) );
+define('PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
 
 class Antay_Query_Loader {
-
-	/* 
-	 * will hold the value we get from our options 
-	 */
-	public $options;
 
 	/**
 	 * Run all the hooks and other functions after being instantiated.
 	 */
 	public function __construct() 
 	{
-		$this->options = get_option( 'ulp_general_options' );
-		add_action( 'admin_menu', array( $this, 'ulp_settings_page' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'ulp_front_scripts_and_styles' ), 0 );
-		add_action( 'admin_init', array( $this, 'ulp_settings_page_settings_and_field' ) );
+		// $this->options = get_option( 'aql_general_options' );
+		add_action( 'wp_enqueue_scripts', array( $this, 'aql_front_scripts_and_styles' ), 0 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'value_to_js' ), 0 );
+		add_action( 'admin_enqueue_scripts', array($this, 'aql_add_color_picker' ) );
 
-	}
-
-	/**
-	 * Load all the scripts and css will be using to show to our users
-	 */
-	public function ulp_front_scripts_and_styles()
-	{
-
-		if( isset( $this->options['ulp_switch']) && $this->options['ulp_switch'] == true ) {
-			wp_enqueue_script( 'ulp-front-jquery-loader-script', PLUGIN_ROOT_PATH . '/assets/js/queryloader2.min.js', array(), false, false  );
-			wp_enqueue_script( 'ulp-front-main-script', PLUGIN_ROOT_PATH. '/assets/js/main.js', array(), false );
+		if ( is_admin() ) {
+			include( 'includes/admin/class-aql-admin.php' );
 		}
 	}
 
 
 	/**
-	 * Add a custom settings page for our plugin.
+	 * Load all the scripts and style
 	 */
-	public function ulp_settings_page()
+	public function aql_front_scripts_and_styles()
 	{
-		// add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position ); 
 
-		add_menu_page( 'Antay Query Loader', 'Antay Query Loader', 'manage_options', 'ulp_page_name', array($this, 'ulp_settings_page_function') );
+		wp_enqueue_script( 'aql-queryloader2-script', PLUGIN_URL_PATH . '/assets/js/queryloader2.min.js', array(), false, false  );
 	}
 
 	/**
-	 * This will output the settings page of our plugin
+	 * Add the color picker for some settings field we have.
 	 */
-	public function ulp_settings_page_function()
-	{
-
-		?>
-		<div class="wrap">
-			<h2><?php _e('Settings') ?></h2>
-
-			<form action="options.php" method="post">
-
-				<?php settings_errors(); ?>
-				<?php settings_fields( 'ulp_page_name' ) ?>
-
-				<?php do_settings_sections( 'ulp_page_name' ) ?>
-
-				<?php submit_button(); ?>
-
-			</form>
-		</div>
-		<?php
+	function aql_add_color_picker( $hook ) {
+	 
+	    if( is_admin() ) { 
+	     
+	        // Add the color picker css file       
+	        wp_enqueue_style( 'wp-color-picker' ); 
+	         
+	        // Include our custom jQuery file with WordPress Color Picker dependency
+	        wp_enqueue_script( 'custom-script-handle', PLUGIN_URL_PATH . '/assets/js/admin.js', array( 'wp-color-picker' ), false, true ); 
+	    }
 	}
 
 	/**
-	 * We will register settings here and our custom fields and sections
+	 * Pass the value we get from the settings page to javascript
+	 * Thanks to wp_localize_script and ottopress
 	 */
-	public function ulp_settings_page_settings_and_field()
-	{
+	function value_to_js() {
 
-		add_settings_section(
-			'ulp_general_section',
-			__('General Settings'),
-			array( $this, 'ulp_general_section_callback' ),
-			'ulp_page_name'
+		// init and set the variable
+		$aql_switch = ( get_option( 'aql_switch' ) !== '' ) ? 'true' : 'false';
+		$aql_percentage = ( get_option( 'aql_use_percentage' ) !== '' ) ? 'true' : 'false';
+		$bar_color = ( get_option( 'aql_bar_color' ) == '' ) ? '#fff': get_option( 'aql_bar_color' ); 
+		$background_color = ( get_option( 'aql_bg_color' ) == '' ) ? '#000': get_option( 'aql_bg_color' );
+		$bar_height	= ( get_option( 'aql_bar_height' ) == '' ) ? '10': get_option( 'aql_bar_height' );
+		$min_time	= ( get_option( 'aql_minimum_time' ) == '' ) ? '1000': get_option( 'aql_minimum_time' );
+		$fadeout_time	= ( get_option( 'aql_fadeout_time' ) == '' ) ? '1000': get_option( 'aql_fadeout_time' );
+
+		$params = array(
+			'switch'				=>		$aql_switch,
+			'percentage'			=>		$aql_percentage,
+			'barColor'				=>		$bar_color,
+			'backgroundColor'		=>		$background_color,
+			'barHeight'				=>		$bar_height,
+			'minimumTime'			=>		$min_time,
+			'fadeOutTime'			=>		$fadeout_time,
 		);
 
-		add_settings_field(
-			'ulp_switch',
-			__('Enable Antay Query Loader'),
-			array( $this, 'ulp_switch_field'),
-			'ulp_page_name',
-			'ulp_general_section'
-		);
+		// register the script
+		wp_register_script( 'aql-main-script', PLUGIN_URL_PATH . '/assets/js/main.js' );
 
-		register_setting( 
-			'ulp_page_name',
-			'ulp_general_options'
-		);
+		wp_localize_script( 'aql-main-script', 'AqlObject', $params );
+
+		wp_enqueue_script( 'aql-main-script' );
 	}
 
-	/**
-	 * ULP General Section Callback Function
-	 */
-	public function ulp_general_section_callback()
-	{
-		//TODO - leave blank for now
-	}
-
-	/**
-	 * Ouput the input field for ulp_switch
-	 */
-	public function ulp_switch_field()
-	{
-
-		if( !isset($this->options['ulp_switch']) ) {
-			$this->options['ulp_switch'] = false;
-		}
-		
-		echo '<input type="checkbox" name="ulp_general_options[ulp_switch]" id="ulp-switch" value="1" ' . checked( $this->options['ulp_switch'], 1, false ) . '/>';
-	}
-
-	
 
 }
 
 // run the plugin.
-new Antay_Query_Loader();
+return new Antay_Query_Loader();
 
